@@ -1,89 +1,1085 @@
-<!-- BEGIN -->
 <!DOCTYPE html>
-<html>
-
+<html lang="ru">
   <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <title>Резюме Алексей Примадонин</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тренажер таблицы умножения</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Comic Sans MS", cursive, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 600px;
+        padding: 30px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .title-group {
+        margin-bottom: 20px;
+      }
+
+      h1 {
+        color: #ff6b6b;
+        margin-bottom: 10px;
+        font-size: 2.2rem;
+        text-shadow: 2px 2px 0px #ffd166;
+      }
+
+      .game-screen,
+      .result-screen,
+      .name-screen,
+      .records-screen {
+        display: none;
+      }
+
+      .active {
+        display: block;
+      }
+
+      .problem {
+        font-size: 2.5rem;
+        margin: 25px 0;
+        color: #118ab2;
+      }
+
+      .timer {
+        font-size: 1.5rem;
+        color: #ff6b6b;
+        margin: 10px 0;
+      }
+
+      .answer-input {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.5rem;
+        text-align: center;
+        border: 3px solid #06d6a0;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        outline: none;
+      }
+
+      .answer-input:focus {
+        border-color: #118ab2;
+        box-shadow: 0 0 10px rgba(17, 138, 178, 0.5);
+      }
+
+      .btn {
+        background-color: #06d6a0;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        font-size: 1.2rem;
+        border-radius: 50px;
+        cursor: pointer;
+        margin: 10px 5px;
+        transition: all 0.3s;
+      }
+
+      .btn:hover {
+        background-color: #05c48f;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .btn-check {
+        background-color: #118ab2;
+      }
+
+      .btn-check:hover {
+        background-color: #0d7a9c;
+      }
+
+      .btn-new {
+        background-color: #ff6b6b;
+      }
+
+      .btn-new:hover {
+        background-color: #f45c5c;
+      }
+
+      .btn-save {
+        background-color: #ffd166;
+        color: #333;
+      }
+
+      .btn-save:hover {
+        background-color: #f9c74f;
+      }
+
+      .feedback {
+        font-size: 1.5rem;
+        margin: 20px 0;
+        min-height: 70px;
+      }
+
+      .correct {
+        color: #06d6a0;
+      }
+
+      .incorrect {
+        color: #ff6b6b;
+      }
+
+      .score {
+        font-size: 1.3rem;
+        margin: 15px 0;
+        color: #118ab2;
+      }
+
+      .result-message {
+        font-size: 1.8rem;
+        margin: 20px 0;
+        color: #118ab2;
+      }
+
+      .progress-bar {
+        height: 15px;
+        background-color: #e9ecef;
+        border-radius: 10px;
+        margin: 20px 0;
+        overflow: hidden;
+      }
+
+      .progress {
+        height: 100%;
+        background-color: #06d6a0;
+        width: 0%;
+        transition: width 0.5s;
+      }
+
+      .settings {
+        margin: 20px 0;
+        text-align: left;
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+      }
+
+      .settings h3 {
+        color: #ff6b6b;
+        margin-bottom: 10px;
+      }
+
+      .number-range {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin: 10px 0;
+      }
+
+      .number-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #118ab2;
+        background-color: white;
+        color: #118ab2;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .number-btn.selected {
+        background-color: #118ab2;
+        color: white;
+      }
+
+      .name-input {
+        width: 100%;
+        padding: 15px;
+        font-size: 1.2rem;
+        text-align: center;
+        border: 3px solid #06d6a0;
+        border-radius: 10px;
+        margin: 20px 0;
+        outline: none;
+      }
+
+      .records-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+
+      .records-table th,
+      .records-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+      }
+
+      .records-table th {
+        background-color: #118ab2;
+        color: white;
+      }
+
+      .records-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      .record-highlight {
+        background-color: #ffd166 !important;
+        font-weight: bold;
+      }
+
+      .firework {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .champion-message {
+        font-size: 1.5rem;
+        color: #ff6b6b;
+        margin: 15px 0;
+        font-weight: bold;
+      }
+
+      .motivation-message {
+        font-size: 1.2rem;
+        color: #118ab2;
+        margin: 15px 0;
+        font-style: italic;
+      }
+
+      .firebase-loading {
+        font-size: 1rem;
+        color: #118ab2;
+        margin: 10px 0;
+      }
+
+      @keyframes celebrate {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .celebrate {
+        animation: celebrate 0.5s ease;
+      }
+
+      @keyframes fireworks {
+        0% {
+          transform: translate(0, 0) scale(0.5);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(var(--tx), var(--ty)) scale(2);
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 500px) {
+        .container {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .problem {
+          font-size: 2rem;
+        }
+
+        .btn {
+          padding: 10px 20px;
+          font-size: 1rem;
+        }
+
+        .champion-message,
+        .motivation-message {
+          font-size: 1rem;
+        }
+      }
+    </style>
+    <!-- Добавляем Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   </head>
-
   <body>
-    <div id="header">
-      <h1>Алексей Примадонин</h1>
-      <h3>Веб-разработчик</h3>
-      <p>
-        <a href="mailto:ap@somemail.com">ap@somemail.com</a>,
-        <a href="https://github.com/alprima">github.com/alprima</a>
-      </p>
-    </div>
+    <div class="container">
+      <div class="title-group">
+        <h1>🚀 Тренажер 🚀</h1>
+        <h1>таблицы умножения</h1>
+      </div>
 
-    <div id="main">
-      <p>
-        Я увлекаюсь веб-дизайном со старших классов школы. Начал с мини-сайтов для себя и друзей, потом для местных фирм и организаций. После курсов на Хекслете начал работу веб-разработчиком. Пишу на JS (ES6), люблю функциональное программирование. Умею работать с SQL, HTTP, Git и Ansible. Пишу тесты.
-      </p>
-
-      <p>
-        Готов к удаленной работе и релокации.
-      </p>
-
-      <div class="main_section">
-        <h2>Опыт работы</h2>
-
-        <div class="main_section_item">
-          <h3>Майкрософт Россия</h3>
-          <p>Программист (стажировка), <i>апрель 2016 — ноябрь 2016</i></p>
-          <ul>
-            <li>Работа в команде на C#</li>
-            <li>Создание веб-сайта проекта JDX</li>
-          </ul>
+      <div id="name-screen" class="name-screen active">
+        <div class="settings">
+          <h3>Как тебя зовут, чемпион?</h3>
+          <input
+            type="text"
+            id="player-name"
+            class="name-input"
+            placeholder="Введи своё имя"
+            maxlength="15"
+          />
+          <h3>Выбери числа для тренировки (от 2 до 9):</h3>
+          <div class="number-range">
+            <!-- Кнопки для выбора чисел от 2 до 9 -->
+          </div>
         </div>
-
-        <div class="main_section_item">
-          <h3>TOO «Винная Баня»</h3>
-          <p>Веб-дизайн, <i>январь 2015 — апрель 2016</i></p>
-          <ul>
-            <li>Верстка макетов</li>
-            <li>Разработка тем для Wordpress</li>
-            <li>Поддержка сайта</li>
-          </ul>
+        <button id="start-btn" class="btn">Начать игру</button>
+        <button id="show-records-btn" class="btn">Таблица рекордов</button>
+        <div id="firebase-status" class="firebase-loading">
+          Подключаемся к таблице лидеров...
         </div>
       </div>
 
-      <div class="main_section">
-        <h2>Образование</h2>
-
-        <div class="main_section_item">
-          <h3>Университет им. Патриса Лумумбы</h3>
-          <p>Бакалавр информационных систем, <i>2012 —  2016</i></p>
+      <div id="game-screen" class="game-screen">
+        <div class="timer">Время: <span id="timer">00:00</span></div>
+        <div class="progress-bar">
+          <div id="progress" class="progress"></div>
         </div>
-
-        <div class="main_section_item">
-          <h3>Хекслет</h3>
-          <p>Курсы по программированию, JS Backend/Frontend, <i>2015 — 2017</i></p>
-        </div>
+        <div class="score">Счет: <span id="score">0</span> из 10</div>
+        <div id="problem" class="problem">7 × 8 = ?</div>
+        <input
+          type="number"
+          id="answer-input"
+          class="answer-input"
+          placeholder="Введите ответ"
+        />
+        <div id="feedback" class="feedback"></div>
+        <button id="check-btn" class="btn btn-check">Проверить</button>
+        <button id="new-game-btn" class="btn btn-new">Новая игра</button>
       </div>
 
-      <div class="main_section">
-        <h2>Другие навыки и увлечения</h2>
-
-        <div class="main_section_item">
-          <ul>
-            <li>Основы дизайна и типографики</li>
-            <li>Любительская игра на гитаре</li>
-            <li>Хоккей на траве (городская лига)</li>
-          </ul>
+      <div id="result-screen" class="result-screen">
+        <div class="result-message" id="result-message">
+          Отлично поработано! 🎉
         </div>
+        <div class="score">
+          Твой результат: <span id="final-score">0</span> из 10
+        </div>
+        <div class="timer">
+          Затраченное время: <span id="final-time">00:00</span>
+        </div>
+
+        <div
+          id="champion-message"
+          class="champion-message"
+          style="display: none"
+        ></div>
+        <div
+          id="motivation-message"
+          class="motivation-message"
+          style="display: none"
+        ></div>
+
+        <div id="save-result-container" style="display: none">
+          <button id="save-result-btn" class="btn btn-save">
+            Сохранить мой результат
+          </button>
+        </div>
+
+        <button id="restart-btn" class="btn">Играть снова</button>
+        <button id="to-records-btn" class="btn">Таблица рекордов</button>
       </div>
 
+      <div id="records-screen" class="records-screen">
+        <h2>Таблица рекордов</h2>
+        <table class="records-table">
+          <thead>
+            <tr>
+              <th>Место</th>
+              <th>Имя</th>
+              <th>Результат</th>
+              <th>Время</th>
+            </tr>
+          </thead>
+          <tbody id="records-body">
+            <!-- Записи рекордов будут добавляться с помощью JS -->
+          </tbody>
+        </table>
+        <button id="back-to-menu-btn" class="btn">В главное меню</button>
+      </div>
     </div>
 
-    <div id="footer">
-      <strong>Алексей Примадонин</strong>
-      <br/>
-      ул. Полевая, 12, Астрахань, Россия +7 888 127 00 01, <a href="mailto:ap@somemail.com">ap@somemail.com</a>
-    </div>
+    <script>
+      // Конфигурация Firebase - нужно заменить на вашу конфигурацию
+      const firebaseConfig = {
+        apiKey: "AIzaSyAZQ9j8OTEYTpCEQ4dAY_7tQLscE-LaVVk",
+        authDomain: "multiplication-table-tra-4724b.firebaseapp.com",
+        projectId: "multiplication-table-tra-4724b",
+        storageBucket: "multiplication-table-tra-4724b.firebasestorage.app",
+        messagingSenderId: "1084216835885",
+        appId: "1:1084216835885:web:410cb696b2c4ff9df99da4",
+      };
 
+      // Инициализация Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Элементы DOM
+        const nameScreen = document.getElementById("name-screen");
+        const gameScreen = document.getElementById("game-screen");
+        const resultScreen = document.getElementById("result-screen");
+        const recordsScreen = document.getElementById("records-screen");
+        const startBtn = document.getElementById("start-btn");
+        const checkBtn = document.getElementById("check-btn");
+        const newGameBtn = document.getElementById("new-game-btn");
+        const restartBtn = document.getElementById("restart-btn");
+        const saveResultBtn = document.getElementById("save-result-btn");
+        const saveResultContainer = document.getElementById(
+          "save-result-container"
+        );
+        const showRecordsBtn = document.getElementById("show-records-btn");
+        const toRecordsBtn = document.getElementById("to-records-btn");
+        const backToMenuBtn = document.getElementById("back-to-menu-btn");
+        const problemElement = document.getElementById("problem");
+        const answerInput = document.getElementById("answer-input");
+        const feedbackElement = document.getElementById("feedback");
+        const scoreElement = document.getElementById("score");
+        const finalScoreElement = document.getElementById("final-score");
+        const resultMessageElement = document.getElementById("result-message");
+        const championMessageElement =
+          document.getElementById("champion-message");
+        const motivationMessageElement =
+          document.getElementById("motivation-message");
+        const progressElement = document.getElementById("progress");
+        const timerElement = document.getElementById("timer");
+        const finalTimeElement = document.getElementById("final-time");
+        const playerNameInput = document.getElementById("player-name");
+        const recordsBody = document.getElementById("records-body");
+        const firebaseStatus = document.getElementById("firebase-status");
+
+        // Переменные игры
+        let selectedNumbers = [];
+        let currentProblem = {};
+        let score = 0;
+        let totalProblems = 10;
+        let problemsSolved = 0;
+        let gameTime = 0;
+        let timerInterval = null;
+        let playerName = "";
+        let isChecking = false;
+        let isNewChampion = false;
+        let isFirebaseConnected = false;
+
+        // Проверка соединения с Firebase
+        function checkFirebaseConnection() {
+          db.collection("connectionTest")
+            .doc("test")
+            .get()
+            .then(() => {
+              isFirebaseConnected = true;
+              firebaseStatus.textContent = "Таблица лидеров подключена!";
+              firebaseStatus.style.color = "#06d6a0";
+            })
+            .catch((error) => {
+              console.error("Ошибка подключения к Firebase:", error);
+              firebaseStatus.textContent =
+                "Не удалось подключиться к таблице лидеров. Рекорды будут сохранены локально.";
+              firebaseStatus.style.color = "#ff6b6b";
+            });
+        }
+
+        // Проверяем подключение при загрузке
+        checkFirebaseConnection();
+
+        // Создаем кнопки для выбора чисел от 2 до 9
+        const numberRangeContainer = document.querySelector(".number-range");
+        for (let i = 2; i <= 9; i++) {
+          const button = document.createElement("button");
+          button.className = "number-btn";
+          button.textContent = i;
+          button.dataset.number = i;
+
+          button.addEventListener("click", function () {
+            this.classList.toggle("selected");
+            const number = parseInt(this.dataset.number);
+
+            if (selectedNumbers.includes(number)) {
+              selectedNumbers = selectedNumbers.filter((n) => n !== number);
+            } else {
+              selectedNumbers.push(number);
+            }
+          });
+
+          numberRangeContainer.appendChild(button);
+        }
+
+        // Начальные значения
+        selectedNumbers = [2, 3, 4];
+
+        // Выделяем кнопки по умолчанию
+        document.querySelectorAll(".number-btn").forEach((btn) => {
+          if ([2, 3, 4].includes(parseInt(btn.dataset.number))) {
+            btn.classList.add("selected");
+          }
+        });
+
+        // Функции для работы со звуками
+        function playCorrectSound() {
+          const context = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const oscillator = context.createOscillator();
+          const gainNode = context.createGain();
+
+          oscillator.type = "sine";
+          oscillator.frequency.setValueAtTime(880, context.currentTime);
+          oscillator.frequency.setValueAtTime(
+            1046.5,
+            context.currentTime + 0.1
+          );
+
+          gainNode.gain.setValueAtTime(0.5, context.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            context.currentTime + 0.3
+          );
+
+          oscillator.connect(gainNode);
+          gainNode.connect(context.destination);
+
+          oscillator.start();
+          oscillator.stop(context.currentTime + 0.3);
+        }
+
+        function playWrongSound() {
+          const context = new (window.AudioContext ||
+            window.webkitAudioContext)();
+          const oscillator = context.createOscillator();
+          const gainNode = context.createGain();
+
+          oscillator.type = "sawtooth";
+          oscillator.frequency.setValueAtTime(220, context.currentTime);
+          oscillator.frequency.setValueAtTime(196, context.currentTime + 0.1);
+
+          gainNode.gain.setValueAtTime(0.5, context.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(
+            0.01,
+            context.currentTime + 0.5
+          );
+
+          oscillator.connect(gainNode);
+          gainNode.connect(context.destination);
+
+          oscillator.start();
+          oscillator.stop(context.currentTime + 0.5);
+        }
+
+        function playFireworkSound() {
+          const context = new (window.AudioContext ||
+            window.webkitAudioContext)();
+
+          for (let i = 0; i < 5; i++) {
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+
+            oscillator.type = "sine";
+            oscillator.frequency.setValueAtTime(
+              300 + i * 100,
+              context.currentTime + i * 0.1
+            );
+
+            gainNode.gain.setValueAtTime(0.7, context.currentTime + i * 0.1);
+            gainNode.gain.exponentialRampToValueAtTime(
+              0.01,
+              context.currentTime + i * 0.1 + 0.5
+            );
+
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+
+            oscillator.start(context.currentTime + i * 0.1);
+            oscillator.stop(context.currentTime + i * 0.1 + 0.5);
+          }
+        }
+
+        // Загрузка рекордов из Firebase или localStorage
+        async function loadRecords() {
+          if (!isFirebaseConnected) {
+            // Используем localStorage, если Firebase недоступен
+            const records =
+              JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+            return records;
+          }
+
+          try {
+            const snapshot = await db
+              .collection("records")
+              .orderBy("score", "desc")
+              .orderBy("time", "asc")
+              .limit(10)
+              .get();
+
+            const records = [];
+            snapshot.forEach((doc) => {
+              records.push(doc.data());
+            });
+
+            return records;
+          } catch (error) {
+            console.error("Ошибка загрузки рекордов:", error);
+            // Возвращаем локальные рекорды в случае ошибки
+            return (
+              JSON.parse(localStorage.getItem("multiplicationRecords")) || []
+            );
+          }
+        }
+
+        // Сохранение рекордов в Firebase или localStorage
+        async function saveRecord() {
+          if (!isFirebaseConnected) {
+            // Используем localStorage, если Firebase недоступен
+            const records =
+              JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+            records.push({
+              name: playerName,
+              score: score,
+              time: gameTime,
+            });
+            localStorage.setItem(
+              "multiplicationRecords",
+              JSON.stringify(records)
+            );
+            return false;
+          }
+
+          try {
+            // Сохраняем в Firebase
+            await db.collection("records").add({
+              name: playerName,
+              score: score,
+              time: gameTime,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            return true;
+          } catch (error) {
+            console.error("Ошибка сохранения рекорда:", error);
+            // Сохраняем локально в случае ошибки
+            const records =
+              JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+            records.push({
+              name: playerName,
+              score: score,
+              time: gameTime,
+            });
+            localStorage.setItem(
+              "multiplicationRecords",
+              JSON.stringify(records)
+            );
+            return false;
+          }
+        }
+
+        // Получение лучшего результата
+        async function getBestRecord() {
+          const records = await loadRecords();
+          if (records.length === 0) return null;
+
+          // Сортируем записи: сначала по количеству очков, затем по времени
+          const sortedRecords = records.sort((a, b) => {
+            if (b.score !== a.score) {
+              return b.score - a.score;
+            }
+            return a.time - b.time;
+          });
+
+          return sortedRecords[0];
+        }
+
+        // Проверка, является ли текущий результат чемпионским
+        async function checkIfChampion() {
+          const bestRecord = await getBestRecord();
+
+          // Если нет записей или текущий результат лучше
+          if (
+            !bestRecord ||
+            (score === 10 &&
+              (gameTime < bestRecord.time || bestRecord.score < 10))
+          ) {
+            isNewChampion = true;
+            return true;
+          }
+
+          isNewChampion = false;
+          return false;
+        }
+
+        // Отображение таблицы рекордов
+        async function showRecords() {
+          const records = await loadRecords();
+          recordsBody.innerHTML = "";
+
+          if (records.length === 0) {
+            recordsBody.innerHTML =
+              '<tr><td colspan="4">Пока нет рекордов!</td></tr>';
+            return;
+          }
+
+          // Сортируем записи: сначала по количеству очков, затем по времени
+          const sortedRecords = records.sort((a, b) => {
+            if (b.score !== a.score) {
+              return b.score - a.score;
+            }
+            return a.time - b.time;
+          });
+
+          // Показываем топ-5
+          const topRecords = sortedRecords.slice(0, 5);
+
+          topRecords.forEach((record, index) => {
+            const row = document.createElement("tr");
+
+            if (index === 0) {
+              row.classList.add("record-highlight");
+            }
+
+            const placeCell = document.createElement("td");
+            placeCell.textContent = index + 1;
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = record.name;
+
+            const scoreCell = document.createElement("td");
+            scoreCell.textContent = `${record.score}/10`;
+
+            const timeCell = document.createElement("td");
+            timeCell.textContent = formatTime(record.time);
+
+            row.appendChild(placeCell);
+            row.appendChild(nameCell);
+            row.appendChild(scoreCell);
+            row.appendChild(timeCell);
+
+            recordsBody.appendChild(row);
+          });
+        }
+
+        // Форматирование времени в мм:сс
+        function formatTime(seconds) {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins
+            .toString()
+            .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+        }
+
+        // Запуск таймера
+        function startTimer() {
+          gameTime = 0;
+          timerElement.textContent = formatTime(gameTime);
+
+          if (timerInterval) {
+            clearInterval(timerInterval);
+          }
+
+          timerInterval = setInterval(() => {
+            gameTime++;
+            timerElement.textContent = formatTime(gameTime);
+          }, 1000);
+        }
+
+        // Остановка таймера
+        function stopTimer() {
+          if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+          }
+        }
+
+        // Создание фейерверка
+        function createFireworks() {
+          const container = document.querySelector(".container");
+          const colors = [
+            "#ff6b6b",
+            "#06d6a0",
+            "#118ab2",
+            "#ffd166",
+            "#a777e3",
+          ];
+
+          for (let i = 0; i < 50; i++) {
+            const firework = document.createElement("div");
+            firework.className = "firework";
+            firework.style.backgroundColor =
+              colors[Math.floor(Math.random() * colors.length)];
+            firework.style.left = "50%";
+            firework.style.top = "50%";
+
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 100 + Math.random() * 200;
+            const tx = Math.cos(angle) * distance;
+            const ty = Math.sin(angle) * distance;
+
+            firework.style.setProperty("--tx", `${tx}px`);
+            firework.style.setProperty("--ty", `${ty}px`);
+
+            firework.style.animation = `fireworks 1s ease-out forwards`;
+
+            container.appendChild(firework);
+
+            // Удаляем элемент после завершения анимации
+            setTimeout(() => {
+              firework.remove();
+            }, 1000);
+          }
+
+          // Воспроизводим звук фейерверка
+          playFireworkSound();
+        }
+
+        // Начать игру
+        startBtn.addEventListener("click", function () {
+          playerName = playerNameInput.value.trim() || "Игрок";
+
+          if (selectedNumbers.length === 0) {
+            alert("Пожалуйста, выбери хотя бы одно число для тренировки!");
+            return;
+          }
+
+          nameScreen.classList.remove("active");
+          gameScreen.classList.add("active");
+
+          score = 0;
+          problemsSolved = 0;
+          scoreElement.textContent = score;
+          progressElement.style.width = "0%";
+          feedbackElement.textContent = "";
+          answerInput.value = "";
+
+          startTimer();
+          generateProblem();
+          answerInput.focus();
+        });
+
+        // Показать таблицу рекордов
+        showRecordsBtn.addEventListener("click", function () {
+          nameScreen.classList.remove("active");
+          recordsScreen.classList.add("active");
+          showRecords();
+        });
+
+        // Назад в меню из таблицы рекордов
+        backToMenuBtn.addEventListener("click", function () {
+          recordsScreen.classList.remove("active");
+          nameScreen.classList.add("active");
+        });
+
+        // Кнопка "Таблица рекордов" на экране результатов
+        toRecordsBtn.addEventListener("click", function () {
+          resultScreen.classList.remove("active");
+          recordsScreen.classList.add("active");
+          showRecords();
+        });
+
+        // Новая игра
+        newGameBtn.addEventListener("click", function () {
+          gameScreen.classList.remove("active");
+          nameScreen.classList.add("active");
+          stopTimer();
+        });
+
+        // Перезапуск игры
+        restartBtn.addEventListener("click", function () {
+          resultScreen.classList.remove("active");
+          nameScreen.classList.add("active");
+        });
+
+        // Сохранение результата
+        saveResultBtn.addEventListener("click", async function () {
+          const saved = await saveRecord();
+
+          if (isNewChampion) {
+            championMessageElement.textContent =
+              "Ты новый чемпион! 🏆 Твоё имя теперь в таблице рекордов!";
+          } else {
+            championMessageElement.textContent = "Твой результат сохранен! 👍";
+          }
+
+          championMessageElement.style.display = "block";
+          saveResultContainer.style.display = "none";
+
+          // Обновляем таблицу рекордов
+          showRecords();
+        });
+
+        // Проверить ответ
+        checkBtn.addEventListener("click", checkAnswer);
+
+        // Проверить ответ при нажатии Enter
+        answerInput.addEventListener("keyup", function (event) {
+          if (event.key === "Enter" && !isChecking) {
+            checkAnswer();
+          }
+        });
+
+        // Генерация примера
+        function generateProblem() {
+          if (problemsSolved >= totalProblems) {
+            endGame();
+            return;
+          }
+
+          const num1 =
+            selectedNumbers[Math.floor(Math.random() * selectedNumbers.length)];
+          const num2 = Math.floor(Math.random() * 8) + 2; // Числа от 2 до 9
+
+          currentProblem = {
+            num1: num1,
+            num2: num2,
+            answer: num1 * num2,
+          };
+
+          problemElement.textContent = `${num1} × ${num2} = ?`;
+        }
+
+        // Проверка ответа
+        function checkAnswer() {
+          if (isChecking || !answerInput.value) return;
+
+          isChecking = true;
+          checkBtn.disabled = true;
+
+          const userAnswer = parseInt(answerInput.value);
+
+          if (userAnswer === currentProblem.answer) {
+            // Правильный ответ
+            feedbackElement.textContent = "Верно! 👍";
+            feedbackElement.className = "feedback correct";
+            score++;
+            scoreElement.textContent = score;
+            problemElement.classList.add("celebrate");
+
+            // Воспроизводим звук правильного ответа
+            playCorrectSound();
+
+            setTimeout(() => {
+              problemElement.classList.remove("celebrate");
+            }, 500);
+          } else {
+            // Неправильный ответ
+            feedbackElement.textContent = `Неверно 😢 Правильный ответ: ${currentProblem.answer}`;
+            feedbackElement.className = "feedback incorrect";
+
+            // Воспроизводим звук неправильного ответа
+            playWrongSound();
+          }
+
+          problemsSolved++;
+          progressElement.style.width = `${
+            (problemsSolved / totalProblems) * 100
+          }%`;
+
+          // Очищаем поле ввода и готовим следующий вопрос
+          setTimeout(() => {
+            answerInput.value = "";
+            feedbackElement.textContent = "";
+            generateProblem();
+            answerInput.focus();
+            isChecking = false;
+            checkBtn.disabled = false;
+          }, 1500);
+        }
+
+        // Завершение игры
+        async function endGame() {
+          stopTimer();
+          gameScreen.classList.remove("active");
+          resultScreen.classList.add("active");
+
+          finalScoreElement.textContent = score;
+          finalTimeElement.textContent = formatTime(gameTime);
+
+          // Скрываем сообщения и кнопку сохранения по умолчанию
+          championMessageElement.style.display = "none";
+          motivationMessageElement.style.display = "none";
+          saveResultContainer.style.display = "none";
+
+          // Определяем, является ли игрок чемпионом
+          const isChampion = await checkIfChampion();
+          const bestRecord = await getBestRecord();
+
+          if (score === 10) {
+            if (isChampion) {
+              resultMessageElement.textContent =
+                "Идеально! Ты новый чемпион! 🏆";
+              championMessageElement.textContent =
+                "Ты побил все рекорды! Сохрани свой результат!";
+              championMessageElement.style.display = "block";
+              saveResultContainer.style.display = "block";
+              createFireworks();
+            } else {
+              resultMessageElement.textContent = "Идеально! Ты молодец! 👍";
+              motivationMessageElement.textContent = `Но чемпион ${
+                bestRecord.name
+              } был быстрее (${formatTime(
+                bestRecord.time
+              )}). Ты сможешь его победить!`;
+              motivationMessageElement.style.display = "block";
+              saveResultContainer.style.display = "block";
+            }
+          } else if (score >= 7) {
+            resultMessageElement.textContent = "Отлично поработано! 👍";
+            if (bestRecord) {
+              motivationMessageElement.textContent = `Чемпион ${
+                bestRecord.name
+              } набрал 10/10 за ${formatTime(
+                bestRecord.time
+              )}. Ты сможешь его победить!`;
+              motivationMessageElement.style.display = "block";
+            }
+          } else if (score >= 5) {
+            resultMessageElement.textContent = "Хороший результат! 😊";
+            if (bestRecord) {
+              motivationMessageElement.textContent = `Чемпион ${
+                bestRecord.name
+              } набрал 10/10 за ${formatTime(
+                bestRecord.time
+              )}. Продолжай тренироваться!`;
+              motivationMessageElement.style.display = "block";
+            }
+          } else {
+            resultMessageElement.textContent =
+              "Попробуй еще раз! Ты сможешь! 💪";
+            if (bestRecord) {
+              motivationMessageElement.textContent = `Чемпион ${
+                bestRecord.name
+              } набрал 10/10 за ${formatTime(bestRecord.time)}. Не сдавайся!`;
+              motivationMessageElement.style.display = "block";
+            }
+          }
+        }
+      });
+    </script>
   </body>
 </html>
-<!-- END -->

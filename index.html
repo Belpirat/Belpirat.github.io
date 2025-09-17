@@ -6,7 +6,7 @@
     <title>Тренажер таблицы умножения</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
     <style>
-      * {
+     * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
@@ -525,35 +525,34 @@
 
         // Проверка соединения с Firebase
         function checkFirebaseConnection() {
-          // Простая проверка, что Firebase инициализирован
-          try {
-            // Пытаемся выполнить простой запрос к Firestore
-            db.collection("records")
-              .limit(1)
-              .get()
-              .then(() => {
-                isFirebaseConnected = true;
-                firebaseStatus.textContent = "Таблица лидеров подключена!";
-                firebaseStatus.style.color = "#06d6a0";
-                firebaseError.style.display = "none";
-              })
-              .catch((error) => {
-                console.error("Ошибка подключения к Firebase:", error);
-                isFirebaseConnected = false;
-                firebaseStatus.textContent =
-                  "Не удалось подключиться к таблице лидеров.";
-                firebaseStatus.style.color = "#ff6b6b";
-                firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
-                firebaseError.style.display = "block";
-              });
-          } catch (error) {
-            console.error("Ошибка инициализации Firebase:", error);
-            isFirebaseConnected = false;
-            firebaseStatus.textContent = "Ошибка инициализации Firebase.";
-            firebaseStatus.style.color = "#ff6b6b";
-            firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
-            firebaseError.style.display = "block";
-          }
+          firebaseStatus.textContent = "Проверка подключения к Firebase...";
+
+          // Пытаемся выполнить простой запрос к Firestore
+          db.collection("records")
+            .limit(1)
+            .get()
+            .then((snapshot) => {
+              isFirebaseConnected = true;
+              firebaseStatus.textContent = "Таблица лидеров подключена!";
+              firebaseStatus.style.color = "#06d6a0";
+              firebaseError.style.display = "none";
+              console.log("Firebase подключен успешно");
+            })
+            .catch((error) => {
+              console.error("Ошибка подключения к Firebase:", error);
+              isFirebaseConnected = false;
+              firebaseStatus.textContent =
+                "Не удалось подключиться к таблице лидеров.";
+              firebaseStatus.style.color = "#ff6b6b";
+              firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
+              firebaseError.style.display = "block";
+
+              // Проверяем конкретную ошибку отсутствия индекса
+              if (error.code === "failed-precondition") {
+                firebaseError.textContent +=
+                  " Возможно, требуется создать индекс в Firebase Console.";
+              }
+            });
         }
 
         // Проверяем подключение при загрузке
@@ -672,28 +671,45 @@
         // Загрузка рекордов из Firebase или localStorage
         async function loadRecords() {
           if (!isFirebaseConnected) {
-            // Используем localStorage, если Firebase недоступен
+            console.log("Используем локальное хранилище");
             const records =
               JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
-            console.log("Загружены локальные записи:", records);
             return records;
           }
 
           try {
-            const snapshot = await db
-              .collection("records")
-              .orderBy("score", "desc")
-              .orderBy("time", "asc")
-              .limit(10)
-              .get();
+            console.log("Загружаем данные из Firebase");
+            // Альтернативный подход - сначала получаем данные, затем сортируем на клиенте
+            const snapshot = await db.collection("records").get();
 
             const records = [];
             snapshot.forEach((doc) => {
-              records.push({ id: doc.id, ...doc.data() });
+              const data = doc.data();
+              // Проверяем, что данные имеют правильный формат
+              if (
+                data.name &&
+                data.score !== undefined &&
+                data.time !== undefined
+              ) {
+                records.push({
+                  id: doc.id,
+                  name: data.name,
+                  score: parseInt(data.score),
+                  time: parseInt(data.time),
+                });
+              }
+            });
+
+            // Сортируем на клиенте
+            records.sort((a, b) => {
+              if (b.score !== a.score) {
+                return b.score - a.score;
+              }
+              return a.time - b.time;
             });
 
             console.log("Загружены записи из Firebase:", records);
-            return records;
+            return records.slice(0, 10); // Возвращаем топ-10
           } catch (error) {
             console.error("Ошибка загрузки рекордов:", error);
             // Возвращаем локальные рекорды в случае ошибки
@@ -710,34 +726,30 @@
             score: score,
             time: gameTime,
             timestamp: new Date(),
+            date: new Date().toLocaleDateString("ru-RU"),
           };
 
+          // Всегда сохраняем локально
+          const localRecords =
+            JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+          localRecords.push(recordData);
+          localStorage.setItem(
+            "multiplicationRecords",
+            JSON.stringify(localRecords)
+          );
+
           if (!isFirebaseConnected) {
-            // Используем localStorage, если Firebase недоступен
-            const records =
-              JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
-            records.push(recordData);
-            localStorage.setItem(
-              "multiplicationRecords",
-              JSON.stringify(records)
-            );
+            console.log("Firebase не подключен, сохраняем только локально");
             return false;
           }
 
           try {
             // Сохраняем в Firebase
             await db.collection("records").add(recordData);
+            console.log("Результат сохранен в Firebase");
             return true;
           } catch (error) {
-            console.error("Ошибка сохранения рекорда:", error);
-            // Сохраняем локально в случае ошибки
-            const records =
-              JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
-            records.push(recordData);
-            localStorage.setItem(
-              "multiplicationRecords",
-              JSON.stringify(records)
-            );
+            console.error("Ошибка сохранения рекорда в Firebase:", error);
             return false;
           }
         }

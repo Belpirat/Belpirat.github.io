@@ -10,7 +10,8 @@
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: "Comic Sans MS", cursive, sans-serif;
+        /* Обновленные шрифты для кроссплатформенной поддержки */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
       }
 
       body {
@@ -43,6 +44,8 @@
         margin-bottom: 10px;
         font-size: 2.2rem;
         text-shadow: 2px 2px 0px #ffd166;
+        /* Шрифт для заголовков */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
       }
 
       .game-screen,
@@ -60,12 +63,14 @@
         font-size: 2.5rem;
         margin: 25px 0;
         color: #118ab2;
+        font-weight: bold; /* Делаем цифры более четкими */
       }
 
       .timer {
         font-size: 1.5rem;
         color: #ff6b6b;
         margin: 10px 0;
+        font-weight: 600; /* Увеличиваем толщину шрифта */
       }
 
       .answer-input {
@@ -77,6 +82,7 @@
         border-radius: 10px;
         margin-bottom: 20px;
         outline: none;
+        font-weight: 600; /* Делаем ввод текста более четким */
       }
 
       .answer-input:focus {
@@ -94,6 +100,7 @@
         cursor: pointer;
         margin: 10px 5px;
         transition: all 0.3s;
+        font-weight: 600; /* Делаем текст на кнопках более четким */
       }
 
       .btn:hover {
@@ -138,6 +145,7 @@
         font-size: 1.5rem;
         margin: 20px 0;
         min-height: 70px;
+        font-weight: 600; /* Делаем текст обратной связи более четким */
       }
 
       .correct {
@@ -152,12 +160,14 @@
         font-size: 1.3rem;
         margin: 15px 0;
         color: #118ab2;
+        font-weight: 600; /* Делаем текст счета более четким */
       }
 
       .result-message {
         font-size: 1.8rem;
         margin: 20px 0;
         color: #118ab2;
+        font-weight: 600; /* Делаем результат более четким */
       }
 
       .progress-bar {
@@ -186,6 +196,7 @@
       .settings h3 {
         color: #ff6b6b;
         margin-bottom: 10px;
+        font-weight: 600; /* Делаем заголовки настроек более четкими */
       }
 
       .number-range {
@@ -206,6 +217,7 @@
         font-size: 1.1rem;
         cursor: pointer;
         transition: all 0.2s;
+        font-weight: 600; /* Делаем цифры на кнопках более четкими */
       }
 
       .number-btn.selected {
@@ -222,12 +234,14 @@
         border-radius: 10px;
         margin: 20px 0;
         outline: none;
+        font-weight: 600; /* Делаем ввод имени более четким */
       }
 
       .records-table {
         width: 100%;
         border-collapse: collapse;
         margin: 20px 0;
+        font-weight: 600; /* Делаем текст в таблице более четким */
       }
 
       .records-table th,
@@ -271,18 +285,21 @@
         color: #118ab2;
         margin: 15px 0;
         font-style: italic;
+        font-weight: 600; /* Делаем мотивационные сообщения более четкими */
       }
 
       .firebase-loading {
         font-size: 1rem;
         color: #118ab2;
         margin: 10px 0;
+        font-weight: 600; /* Делаем текст статуса более четким */
       }
 
       .firebase-error {
         color: #ff6b6b;
         font-size: 0.9rem;
         margin: 10px 0;
+        font-weight: 600; /* Делаем текст ошибки более четким */
       }
 
       @keyframes celebrate {
@@ -508,34 +525,35 @@
 
         // Проверка соединения с Firebase
         function checkFirebaseConnection() {
-          firebaseStatus.textContent = "Проверка подключения к Firebase...";
-
-          // Пытаемся выполнить простой запрос к Firestore
-          db.collection("records")
-            .limit(1)
-            .get()
-            .then((snapshot) => {
-              isFirebaseConnected = true;
-              firebaseStatus.textContent = "Таблица лидеров подключена!";
-              firebaseStatus.style.color = "#06d6a0";
-              firebaseError.style.display = "none";
-              console.log("Firebase подключен успешно");
-            })
-            .catch((error) => {
-              console.error("Ошибка подключения к Firebase:", error);
-              isFirebaseConnected = false;
-              firebaseStatus.textContent =
-                "Не удалось подключиться к таблице лидеров.";
-              firebaseStatus.style.color = "#ff6b6b";
-              firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
-              firebaseError.style.display = "block";
-
-              // Проверяем конкретную ошибку отсутствия индекса
-              if (error.code === "failed-precondition") {
-                firebaseError.textContent +=
-                  " Возможно, требуется создать индекс в Firebase Console.";
-              }
-            });
+          // Простая проверка, что Firebase инициализирован
+          try {
+            // Пытаемся выполнить простой запрос к Firestore
+            db.collection("records")
+              .limit(1)
+              .get()
+              .then(() => {
+                isFirebaseConnected = true;
+                firebaseStatus.textContent = "Таблица лидеров подключена!";
+                firebaseStatus.style.color = "#06d6a0";
+                firebaseError.style.display = "none";
+              })
+              .catch((error) => {
+                console.error("Ошибка подключения к Firebase:", error);
+                isFirebaseConnected = false;
+                firebaseStatus.textContent =
+                  "Не удалось подключиться к таблице лидеров.";
+                firebaseStatus.style.color = "#ff6b6b";
+                firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
+                firebaseError.style.display = "block";
+              });
+          } catch (error) {
+            console.error("Ошибка инициализации Firebase:", error);
+            isFirebaseConnected = false;
+            firebaseStatus.textContent = "Ошибка инициализации Firebase.";
+            firebaseStatus.style.color = "#ff6b6b";
+            firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
+            firebaseError.style.display = "block";
+          }
         }
 
         // Проверяем подключение при загрузке
@@ -654,45 +672,28 @@
         // Загрузка рекордов из Firebase или localStorage
         async function loadRecords() {
           if (!isFirebaseConnected) {
-            console.log("Используем локальное хранилище");
+            // Используем localStorage, если Firebase недоступен
             const records =
               JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+            console.log("Загружены локальные записи:", records);
             return records;
           }
 
           try {
-            console.log("Загружаем данные из Firebase");
-            // Альтернативный подход - сначала получаем данные, затем сортируем на клиенте
-            const snapshot = await db.collection("records").get();
+            const snapshot = await db
+              .collection("records")
+              .orderBy("score", "desc")
+              .orderBy("time", "asc")
+              .limit(10)
+              .get();
 
             const records = [];
             snapshot.forEach((doc) => {
-              const data = doc.data();
-              // Проверяем, что данные имеют правильный формат
-              if (
-                data.name &&
-                data.score !== undefined &&
-                data.time !== undefined
-              ) {
-                records.push({
-                  id: doc.id,
-                  name: data.name,
-                  score: parseInt(data.score),
-                  time: parseInt(data.time),
-                });
-              }
-            });
-
-            // Сортируем на клиенте
-            records.sort((a, b) => {
-              if (b.score !== a.score) {
-                return b.score - a.score;
-              }
-              return a.time - b.time;
+              records.push({ id: doc.id, ...doc.data() });
             });
 
             console.log("Загружены записи из Firebase:", records);
-            return records.slice(0, 10); // Возвращаем топ-10
+            return records;
           } catch (error) {
             console.error("Ошибка загрузки рекордов:", error);
             // Возвращаем локальные рекорды в случае ошибки
@@ -709,30 +710,34 @@
             score: score,
             time: gameTime,
             timestamp: new Date(),
-            date: new Date().toLocaleDateString("ru-RU"),
           };
 
-          // Всегда сохраняем локально
-          const localRecords =
-            JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
-          localRecords.push(recordData);
-          localStorage.setItem(
-            "multiplicationRecords",
-            JSON.stringify(localRecords)
-          );
-
           if (!isFirebaseConnected) {
-            console.log("Firebase не подключен, сохраняем только локально");
+            // Используем localStorage, если Firebase недоступен
+            const records =
+              JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+            records.push(recordData);
+            localStorage.setItem(
+              "multiplicationRecords",
+              JSON.stringify(records)
+            );
             return false;
           }
 
           try {
             // Сохраняем в Firebase
             await db.collection("records").add(recordData);
-            console.log("Результат сохранен в Firebase");
             return true;
           } catch (error) {
-            console.error("Ошибка сохранения рекорда в Firebase:", error);
+            console.error("Ошибка сохранения рекорда:", error);
+            // Сохраняем локально в случае ошибки
+            const records =
+              JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+            records.push(recordData);
+            localStorage.setItem(
+              "multiplicationRecords",
+              JSON.stringify(records)
+            );
             return false;
           }
         }

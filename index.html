@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Тренажер таблицы умножения</title>
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
     <style>
       * {
         box-sizing: border-box;
@@ -279,6 +279,12 @@
         margin: 10px 0;
       }
 
+      .firebase-error {
+        color: #ff6b6b;
+        font-size: 0.9rem;
+        margin: 10px 0;
+      }
+
       @keyframes celebrate {
         0% {
           transform: scale(1);
@@ -361,6 +367,11 @@
         <div id="firebase-status" class="firebase-loading">
           Подключаемся к таблице лидеров...
         </div>
+        <div
+          id="firebase-error"
+          class="firebase-error"
+          style="display: none"
+        ></div>
       </div>
 
       <div id="game-screen" class="game-screen">
@@ -480,6 +491,7 @@
         const playerNameInput = document.getElementById("player-name");
         const recordsBody = document.getElementById("records-body");
         const firebaseStatus = document.getElementById("firebase-status");
+        const firebaseError = document.getElementById("firebase-error");
 
         // Переменные игры
         let selectedNumbers = [];
@@ -496,20 +508,35 @@
 
         // Проверка соединения с Firebase
         function checkFirebaseConnection() {
-          db.collection("connectionTest")
-            .doc("test")
-            .get()
-            .then(() => {
-              isFirebaseConnected = true;
-              firebaseStatus.textContent = "Таблица лидеров подключена!";
-              firebaseStatus.style.color = "#06d6a0";
-            })
-            .catch((error) => {
-              console.error("Ошибка подключения к Firebase:", error);
-              firebaseStatus.textContent =
-                "Не удалось подключиться к таблице лидеров. Рекорды будут сохранены локально.";
-              firebaseStatus.style.color = "#ff6b6b";
-            });
+          // Простая проверка, что Firebase инициализирован
+          try {
+            // Пытаемся выполнить простой запрос к Firestore
+            db.collection("records")
+              .limit(1)
+              .get()
+              .then(() => {
+                isFirebaseConnected = true;
+                firebaseStatus.textContent = "Таблица лидеров подключена!";
+                firebaseStatus.style.color = "#06d6a0";
+                firebaseError.style.display = "none";
+              })
+              .catch((error) => {
+                console.error("Ошибка подключения к Firebase:", error);
+                isFirebaseConnected = false;
+                firebaseStatus.textContent =
+                  "Не удалось подключиться к таблице лидеров.";
+                firebaseStatus.style.color = "#ff6b6b";
+                firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
+                firebaseError.style.display = "block";
+              });
+          } catch (error) {
+            console.error("Ошибка инициализации Firebase:", error);
+            isFirebaseConnected = false;
+            firebaseStatus.textContent = "Ошибка инициализации Firebase.";
+            firebaseStatus.style.color = "#ff6b6b";
+            firebaseError.textContent = `Ошибка: ${error.message}. Рекорды будут сохраняться локально.`;
+            firebaseError.style.display = "block";
+          }
         }
 
         // Проверяем подключение при загрузке
@@ -631,6 +658,7 @@
             // Используем localStorage, если Firebase недоступен
             const records =
               JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
+            console.log("Загружены локальные записи:", records);
             return records;
           }
 
@@ -644,9 +672,10 @@
 
             const records = [];
             snapshot.forEach((doc) => {
-              records.push(doc.data());
+              records.push({ id: doc.id, ...doc.data() });
             });
 
+            console.log("Загружены записи из Firebase:", records);
             return records;
           } catch (error) {
             console.error("Ошибка загрузки рекордов:", error);
@@ -659,15 +688,18 @@
 
         // Сохранение рекордов в Firebase или localStorage
         async function saveRecord() {
+          const recordData = {
+            name: playerName,
+            score: score,
+            time: gameTime,
+            timestamp: new Date(),
+          };
+
           if (!isFirebaseConnected) {
             // Используем localStorage, если Firebase недоступен
             const records =
               JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
-            records.push({
-              name: playerName,
-              score: score,
-              time: gameTime,
-            });
+            records.push(recordData);
             localStorage.setItem(
               "multiplicationRecords",
               JSON.stringify(records)
@@ -677,23 +709,14 @@
 
           try {
             // Сохраняем в Firebase
-            await db.collection("records").add({
-              name: playerName,
-              score: score,
-              time: gameTime,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            });
+            await db.collection("records").add(recordData);
             return true;
           } catch (error) {
             console.error("Ошибка сохранения рекорда:", error);
             // Сохраняем локально в случае ошибки
             const records =
               JSON.parse(localStorage.getItem("multiplicationRecords")) || [];
-            records.push({
-              name: playerName,
-              score: score,
-              time: gameTime,
-            });
+            records.push(recordData);
             localStorage.setItem(
               "multiplicationRecords",
               JSON.stringify(records)
@@ -903,7 +926,7 @@
           showRecords();
         });
 
-        // Новая игра
+        // Новая игры
         newGameBtn.addEventListener("click", function () {
           gameScreen.classList.remove("active");
           nameScreen.classList.add("active");
@@ -918,20 +941,20 @@
 
         // Сохранение результата
         saveResultBtn.addEventListener("click", async function () {
-          const saved = await saveRecord();
+          const success = await saveRecord();
 
-          if (isNewChampion) {
+          if (success && isNewChampion) {
             championMessageElement.textContent =
               "Ты новый чемпион! 🏆 Твоё имя теперь в таблице рекордов!";
-          } else {
+          } else if (success) {
             championMessageElement.textContent = "Твой результат сохранен! 👍";
+          } else {
+            championMessageElement.textContent =
+              "Результат сохранен локально. Подключитесь к интернету для сохранения в таблице лидеров.";
           }
 
           championMessageElement.style.display = "block";
           saveResultContainer.style.display = "none";
-
-          // Обновляем таблицу рекордов
-          showRecords();
         });
 
         // Проверить ответ
